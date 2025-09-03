@@ -1,6 +1,187 @@
-/******* Change Box Model ***************/
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
+/* =====================================
+   Base Styles (Mobile-First)
+   ===================================== */
+:root {
+    --primary-color: #0c0c0c;
+    --secondary-color: #1a1a1a;
+    --light-color: #e0e0e0;
+    --accent-color: #008cba;
+    --cta-color: #00bcd4;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-color);
+}
+
+#top-header {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#top-header .logo {
+    color: var(--light-color);
+    font-size: 1.5rem;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#top-header .account-link {
+    color: var(--light-color);
+    text-decoration: none;
+}
+
+nav {
+    background-color: var(--secondary-color);
+    padding: 0.5rem 1rem;
+}
+
+.main-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-around;
+}
+
+.main-nav a {
+    color: var(--light-color);
+    text-decoration: none;
+    padding: 0.5rem;
+    display: block;
+    text-align: center;
+}
+
+.main-nav .active {
+    background-color: var(--accent-color);
+    color: var(--light-color);
+    border-radius: 4px;
+}
+
+#main-content {
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.delorean-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.delorean-details {
+    background-color: var(--light-color);
+    padding: 1rem;
+    border: 1px solid var(--primary-color);
+}
+
+.delorean-details h2 {
+    color: var(--accent-color);
+}
+
+.delorean-details ul {
+    list-style-type: none;
+    padding: 0;
+    color: var(--accent-color);
+}
+
+.cta-button {
+    background-color: var(--cta-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.delorean-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.reviews-section, .upgrades-section {
+    margin-bottom: 2rem;
+}
+
+.upgrade-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.upgrade-item {
+    text-align: center;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.upgrade-item img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* =====================================
+   Larger Screens (Media Query)
+   ===================================== */
+@media only screen and (min-width: 768px) {
+    body {
+        background-image: url("/images/site/checkerboard.jpg");
+        background-repeat: repeat;
+    }
+
+    #main-content {
+        border: 2px solid var(--accent-color);
+        background-color: white;
+        padding: 2rem;
+    }
+
+    .delorean-container {
+        flex-direction: row;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+    
+    .delorean-details {
+        flex: 1;
+        order: 2; /* Move details to the right of the image */
+        padding: 2rem;
+    }
+    
+    .delorean-image {
+        flex: 2;
+        order: 1; /* Move image to the left */
+        max-width: 400px; /* Adjust as needed */
+    }
+
+    .bottom-sections-container {
+        display: flex;
+        gap: 2rem;
+        justify-content: space-between;
+    }
+
+    .upgrades-section {
+        flex: 1;
+    }
+
+    .reviews-section {
+        flex: 1;
+    }
+
+    .upgrade-items {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
