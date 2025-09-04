@@ -1,0 +1,133 @@
+<div class="container">
+  <% if (title) { %>
+  <h1><%= title %></h1>
+  <% } else { res.redirect('/') } %> <%- messages() %> <% if (errors) { %>
+  <ul class="notice">
+    <% errors.array().forEach(error => { %>
+    <li><% error.msg %></li>
+    <% }) %>
+  </ul>
+  <% } %>
+
+  <form id="addInventoryForm" method="post" action="/inv/add-inventory">
+    <fieldset>
+      <legend>All fields are required</legend>
+      <label class="top" for="classificationList"
+        >Classification: <%- selectMenu %>
+      </label>
+
+      <label class="top" for="invMake"
+        >Make:
+        <input
+          type="text"
+          id="invMake"
+          name="inv_make"
+          required
+          minlength="2"
+          placeholder="Min of 2 characters"
+          <% if(locals.inv_make) { %>
+          value="<%= locals.inv_make %>"<% } %>>
+      </label>
+
+      <label class="top" for="invModel"
+        >Model:
+        <input
+          type="text"
+          id="invModel"
+          name="inv_model"
+          required
+          minlength="2"
+          placeholder="Min of 2 characters"
+          <% if(locals.inv_model) { %>
+          value="<%= locals.inv_model %>"<% } %>
+        >
+      </label>
+
+      <label class="top" for="invDescription">Description:</label>
+      <textarea
+        id="invDescription"
+        name="inv_description"
+        rows="4"
+        cols="50"
+        required
+        <% if(locals.inv_description) { %>
+          value="<%= locals.inv_description %>"<% } %>>
+      </textarea>
+
+      <label class="top" for="invImage"
+        >Image Path:
+        <input
+          type="text"
+          id="invImage"
+          name="inv_image"
+          value="<%= locals.inv_image?? `/images/vehicles/no-image.png` %>"
+        >
+      </label>
+
+      <label class="top" for="invThumbnail"
+        >Thumbnail Path:
+        <input
+          type="text"
+          id="invThumbnail"
+          name="inv_thumbnail"
+          value="<%= locals.inv_thumbnail?? `/images/vehicles/no-image.png` %>"
+        >
+      </label>
+
+      <label class="top" for="invPrice"
+        >Price:
+        <input
+          type="number"
+          id="invPrice"
+          name="inv_price"
+          required
+          placeholder="Decimal or Integer"
+          <% if(locals.inv_price) { %>
+          value="<%= locals.inv_price %>"<% } %>
+        >
+      </label>
+
+      <label class="top" for="invYear"
+        >Date:
+        <input
+          type="number"
+          id="invYear"
+          name="inv_year"
+          required
+          placeholder="4-digit year"
+          max="9999"
+          <% if(locals.inv_year) { %>
+          value="<%= locals.inv_year %>"<% } %>
+        >
+      </label>
+
+      <label class="top" for="invMiles"
+        >Miles:
+        <input
+          type="text"
+          id="invMiles"
+          name="inv_miles"
+          placeholder="digits only"
+          required
+          pattern="^\d+$"
+          <% if(locals.inv_miles) { %>
+          value="<%= locals.inv_miles %>"<% } %>
+        >
+      </label>
+
+      <label class="top" for="invColor"
+        >Color:
+        <input
+          type="text"
+          id="invColor"
+          name="inv_color"
+          required
+          <% if(locals.inv_color) { %>
+          value="<%= locals.inv_color %>"<% } %>
+        >
+      </label>
+
+      <input type="submit" value="Add Vehicle" class="addVehicleBtn" />
+    </fieldset>
+  </form>
+</div>
