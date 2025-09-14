@@ -1,3 +1,6 @@
+//0.0.0.0/0
+cse340Database
+webservices_2b98
 -- Data for table `inventory`
 
 INSERT INTO public.inventory (
