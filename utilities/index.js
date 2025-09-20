@@ -6,10 +6,11 @@ require("dotenv").config();
 /* ************************
  * Constructs the nav HTML unordered list
  ************************** */
-Util.getNav = async function (req, res, next) {
+// Removemos os parâmetros req, res, next, pois a função é chamada diretamente pelo controlador
+Util.getNav = async function () {
   let data = await invModel.getClassifications();
   let list = "<ul>";
-  list += '<li><a href="/" title="Home page">Home</a></li>';
+  list += '<li><a href="/" title="Home page">Home</a></a></li>';
   data.rows.forEach((row) => {
     list += "<li>";
     list +=
@@ -27,7 +28,7 @@ Util.getNav = async function (req, res, next) {
 };
 
 /* ****************************************
- *  Build classification list drop-down menu
+ * Build classification list drop-down menu
  * ************************************ */
 Util.buildClassificationList = async function (classification_id = null) {
   let data = await invModel.getClassifications();
@@ -96,7 +97,7 @@ Util.buildClassificationGrid = async function (data) {
     });
     grid += "</div>";
   } else {
-    grid += '<p class="notice">Sorry, no matching vehicles could be found.</p>';
+    grid = '<p class="notice">Sorry, no matching vehicles could be found.</p>';
   }
   return grid;
 };
@@ -162,12 +163,12 @@ Util.buildSingleVehiclePage = async function (vehicle, locals = null) {
   carDetailsGrid += "</div>"; // Close grid
   carDetailsGrid += "</div>"; // Close
 
-/***************************************
- * Build the inquiry form
-************************************* */
-    carDetailsGrid += "<hr>"; // Close
-    carDetailsGrid += '<div class="grid grid--2-cols">';
-    carDetailsGrid += '<div class="inquiry-form">';
+  /***************************************
+   * Build the inquiry form
+   ************************************* */
+  carDetailsGrid += "<hr>"; // Close
+  carDetailsGrid += '<div class="grid grid--2-cols">';
+  carDetailsGrid += '<div class="inquiry-form">';
   if (locals) {
     carDetailsGrid += `<form id="inquiryForm" method="post" action="/inv/inquiry">
     <fieldset>
@@ -210,16 +211,16 @@ Util.buildSingleVehiclePage = async function (vehicle, locals = null) {
       <input
         type="hidden"
         name="inv_id"
-        value="${vehicle.inv_id}"        
+        value="${vehicle.inv_id}"         
       >
       <input type="submit" value="Submit" class="submitBtn" />
     </fieldset>
-  </form>`
-  } else { 
-      carDetailsGrid += '<div class="inquiry-info">';
-      carDetailsGrid += '<h3>Do you want to make an inquiry?</h3>';
-      carDetailsGrid += '<a href="/account/login">You must be logged in to send a message</a>';
-      carDetailsGrid += '</div>';
+  </form>`;
+  } else {
+    carDetailsGrid += '<div class="inquiry-info">';
+    carDetailsGrid += '<h3>Do you want to make an inquiry?</h3>';
+    carDetailsGrid += '<a href="/account/login">You must be logged in to send a message</a>';
+    carDetailsGrid += '</div>';
   }
   carDetailsGrid += '</div>';
 
@@ -232,7 +233,7 @@ Util.buildSingleVehiclePage = async function (vehicle, locals = null) {
   carDetailsGrid += '<p class="info-text">323-669-1601</p>';
   carDetailsGrid += '<p class="info-text">Monday – Saturday: 8:00 AM to 6:00 PM</p>';
   carDetailsGrid += '</div>';
-  
+
   carDetailsGrid += "</div>"; // Close grid
 
   return carDetailsGrid;
@@ -281,7 +282,7 @@ Util.checkAccountType = (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET,
       function (err, accountData) {
         if (err || (accountData.account_type != "Employee" && accountData.account_type != "Admin")) {
-          req.flash("Please log in");
+          req.flash("notice", "Access Denied.");
           res.clearCookie("jwt");
           return res.redirect("/account/login");
         }
@@ -289,13 +290,14 @@ Util.checkAccountType = (req, res, next) => {
       }
     );
   } else {
-     return res.redirect("/account/login");
+    req.flash("notice", "Access Denied.");
+    return res.redirect("/account/login");
   }
 };
 
 
 /* ****************************************
- *  Check Login
+ * Check Login
  * ************************************ */
 Util.checkLogin = (req, res, next) => {
   if (res.locals.loggedin) {
