@@ -275,25 +275,31 @@ Util.checkJWTToken = (req, res, next) => {
 /* ****************************************
  * Middleware to check account type
  **************************************** */
-Util.checkAccountType = (req, res, next) => {
+// Middleware para verificar se o usuário tem tipo de conta "Employee" ou "Admin"
+// Este middleware é executado apenas no back-end (Node.js/Express), não tem efeito no front-end.
+// Ele controla o acesso a rotas protegidas no servidor, não interfere diretamente no código do cliente.
+/*Util.checkAccountType = (req, res, next) => {
   if (req.cookies.jwt) {
     jwt.verify(
       req.cookies.jwt,
       process.env.ACCESS_TOKEN_SECRET,
       function (err, accountData) {
+        // Se houver erro ou o tipo de conta não for permitido, nega acesso
         if (err || (accountData.account_type != "Employee" && accountData.account_type != "Admin")) {
           req.flash("notice", "Access Denied.");
           res.clearCookie("jwt");
           return res.redirect("/account/login");
         }
+        // Se permitido, segue para o próximo middleware
         next();
       }
     );
   } else {
+    // Se não houver token, nega acesso
     req.flash("notice", "Access Denied.");
     return res.redirect("/account/login");
   }
-};
+};*/
 
 
 /* ****************************************

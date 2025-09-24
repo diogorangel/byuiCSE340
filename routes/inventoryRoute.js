@@ -19,20 +19,20 @@ router.get("/detail/:carModelId", invVehicle.buildSingleVehicle);
 // Route to add classification
 router.get(
   "/add-classification",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   classificationController.addClassification
 );
 // Route to add inventory
 router.get(
   "/add-inventory",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   selectController.buildDropdown
 );
 
 // Route to classification
 router.post(
   "/add-classification",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   validate.classificationRules(),
   validate.checkClassifData,
   utilities.handleErrors(classificationControllerC.insertClassification)
@@ -41,7 +41,7 @@ router.post(
 // Route to add inventory
 router.post(
   "/add-inventory",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   inventoryValidate.addInventoryRules(),
   inventoryValidate.checkInventoryData,
   utilities.handleErrors(selectController.insertInventory)
@@ -50,27 +50,27 @@ router.post(
 // Route to account management view
 router.get(
   "/",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   utilities.handleErrors(invController.buildManagementView));
 
 // Route to inventory
 router.get(
   "/getInventory/:classification_id",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   utilities.handleErrors(invController.getInventoryJSON)
 );
 
 // Route to inventory management
 router.get(
   "/edit/:inv_id",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   utilities.handleErrors(invController.editInventoryView)
 );
 
 // Route to update vehicle
 router.post(
   "/update/",
-  utilities.checkAccountType,
+  //utilities.checkAccountType,
   inventoryValidate.addNewInventoryRules(),
   inventoryValidate.checkUpdateData,
   utilities.handleErrors(invController.updateInventory));

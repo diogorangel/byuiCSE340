@@ -127,7 +127,7 @@ async function accountLogin(req, res) {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: 3600 }
       );
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "Production") {
         res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 });
       } else {
         res.cookie("jwt", accessToken, {
@@ -171,7 +171,7 @@ async function updateAccount(req, res) {
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: 3600 }
       );
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "Production") {
         res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 });
       } else {
         res.cookie("jwt", accessToken, {
