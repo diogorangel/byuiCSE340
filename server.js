@@ -78,10 +78,14 @@ app.use("/inv", inventoryRoute);
 // User account routes.
 app.use("/account", accountRoute);
 
+// Route to intentionally trigger a 500 server error.
+// This must be placed here, before the 404 handler.
+app.get("/error-test", utilities.handleErrors(baseController.throwError));
+
 /* ***********************
  * Error Handling
  *************************/
-// 404 Not Found route - must be the LAST route.
+// 404 Not Found route - must be the LAST route before the general error handler.
 app.use(async (req, res, next) => {
   next({ status: 404, message: "Sorry, the page you're looking for was not found." });
 });
@@ -90,12 +94,10 @@ app.use(async (req, res, next) => {
 app.use(async (err, req, res, next) => {
   let nav = await utilities.getNav();
   console.error(`Error at: "${req.originalUrl}": ${err.message}`);
-  let message;
-  if (err.status === 404) {
-    message = err.message;
-  } else {
-    message = "Oops! A crash occurred. Maybe try a different route?";
-  }
+
+  // This is the key change: use the specific error message if it exists, otherwise use a generic one.
+  const message = err.message || "Oops! A crash occurred. Maybe try a different route?";
+
   res.render("errors/error", {
     title: err.status || "Server Error",
     message,
