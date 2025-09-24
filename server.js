@@ -2,77 +2,117 @@
  * This server.js file is the primary file of the
  * application. It is used to control the project.
  *******************************************/
+
 /* ***********************
  * Require Statements
  *************************/
-const express = require("express")
-const expressLayouts = require("express-ejs-layouts")
-const env = require("dotenv").config()
-const app = express()
-const static = require("./routes/static")
-const session = require("express-session")
-const flash = require("connect-flash")
-// Importa o utilitário para construir a navegação
-const utilities = require("./utilities/")
-const cookieParser = require("cookie-parser")
-
-// Importando as novas rotas
-const inventoryRoute = require("./routes/inventoryRoute")
-const accountRoute = require("./routes/accountRoute")
+const express = require("express");
+const expressLayouts = require("express-ejs-layouts");
+const env = require("dotenv").config();
+const app = express();
+const static = require("./routes/static");
+const baseController = require("./controllers/baseController");
+const inventoryRoute = require("./routes/inventoryRoute");
+const utilities = require("./utilities");
+const accountRoute = require("./routes/accountRoute");
+const session = require("express-session");
+const pool = require("./database/");
+const pgSession = require("connect-pg-simple")(session);
+const flash = require("connect-flash");
+const cookieParser = require("cookie-parser");
+const expressMessages = require("express-messages");
 
 /* ***********************
  * Middleware
  *************************/
+// Middleware for processing JSON and form data.
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware for processing cookies.
+app.use(cookieParser());
+
+// Session middleware (uses cookies and the database pool).
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'a-secret-string',
+  store: new pgSession({
+    pool,
+    tableName: "session",
+  }),
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  name: "sessionId"
-}))
+  name: "sessionId",
+}));
 
-app.use(flash())
+// Flash message middleware. Must come after session middleware.
+app.use(flash());
 
-app.use(cookieParser())
+// Middleware to make flash messages available in views.
+app.use(function (req, res, next) {
+  res.locals.messages = expressMessages(req, res);
+  next();
+});
 
-app.use((req, res, next) => {
-  res.locals.messages = require("express-messages")(req, res)
-  next()
-})
+// Utility to check for JWT token.
+app.use(utilities.checkJWTToken);
 
-app.set("view engine", "ejs")
-app.use(expressLayouts)
-app.set("layout", "./layouts/layout")
-
-app.use(static)
-
-/* ***********************
- * Local Server Information
- * Values from .env (environment) file
- *************************/
-const port = process.env.PORT
-const host = process.env.HOST
+/* *************************
+ * View Engine and Templates
+ ***************************/
+app.set("view engine", "ejs");
+app.use(expressLayouts);
+app.set("layout", "./layouts/layout");
 
 /* ***********************
  * Routes
  *************************/
-// Rota para o inventário
-app.use("/inv", inventoryRoute)
+// Static route for serving files.
+app.use(static);
 
-// Rota para contas de usuário
-app.use("/account", accountRoute)
+// Index route.
+app.get("/", utilities.handleErrors(baseController.buildHome));
 
-// Rota de índice - ASYNC
-app.get("/", async (req, res) => {
-  let nav = await utilities.getNav()
-  res.render("index", {
-    title: "Home",
-    nav, // Passa 'nav' para a view para que ela possa ser usada no parcial de navegação
-  })
-})
+// Inventory routes.
+app.use("/inv", inventoryRoute);
+
+// User account routes.
+app.use("/account", accountRoute);
 
 /* ***********************
- * Log statement to confirm server operation
+ * Error Handling
+ *************************/
+// 404 Not Found route - must be the LAST route.
+app.use(async (req, res, next) => {
+  next({ status: 404, message: "Sorry, the page you're looking for was not found." });
+});
+
+// Express general error handler. Must be the LAST middleware.
+app.use(async (err, req, res, next) => {
+  let nav = await utilities.getNav();
+  console.error(`Error at: "${req.originalUrl}": ${err.message}`);
+  let message;
+  if (err.status === 404) {
+    message = err.message;
+  } else {
+    message = "Oops! A crash occurred. Maybe try a different route?";
+  }
+  res.render("errors/error", {
+    title: err.status || "Server Error",
+    message,
+    nav,
+    errors: null,
+  });
+});
+
+/* ***********************
+ * Local Server Information
+ *************************/
+const port = process.env.PORT;
+const host = process.env.HOST;
+
+/* ***********************
+ * Start the server
  *************************/
 app.listen(port, () => {
-  console.log(`app listening on  http://localhost:${port}`)
-})
+  console.log(`Server running on http://localhost:${port}`);
+});
