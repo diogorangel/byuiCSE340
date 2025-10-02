@@ -4,15 +4,31 @@ const utilities = require("../utilities/");
 const invCont = {};
 
 /* ***************************
- *  Build inventory by classification view
+ * Build inventory by classification view
  * ************************** */
 invCont.buildByClassificationId = async function (req, res, next) {
   const classification_id = req.params.classificationId;
   const data = await invModel.getInventoryByClassificationId(classification_id);
+  
+  // CORREÇÃO: Verifica se há dados antes de tentar acessar data[0]
+  if (!data || data.length === 0) {
+    // Se nenhum item for encontrado, lança um erro 404
+    let nav = await utilities.getNav();
+    // Você pode preferir um erro 404
+    return res.status(404).render("errors/error", {
+      title: "404 - Not Found",
+      message: "Sorry, we don't found it.",
+      nav,
+      errors: null,
+    });
+  }
+  
   const grid = await utilities.buildClassificationGrid(data);
   let nav = await utilities.getNav();
-  const className =
-    data[0].classification_name ?? "Error retrieving classification name";
+  
+  // Acessa de forma segura a propriedade, agora que sabemos que data[0] existe
+  const className = data[0].classification_name;
+  
   res.render("inventory/classification", {
     title: className + " vehicles",
     nav,
@@ -22,7 +38,7 @@ invCont.buildByClassificationId = async function (req, res, next) {
 };
 
 /* ***************************
- *  Build inventory management view
+ * Build inventory management view
  * ************************** */
 invCont.buildManagementView = async function (req, res, next) {
   let nav = await utilities.getNav();
@@ -36,27 +52,44 @@ invCont.buildManagementView = async function (req, res, next) {
 };
 
 /* ***************************
- *  Return Inventory by Classification As JSON
+ * Return Inventory by Classification As JSON
  * ************************** */
 invCont.getInventoryJSON = async (req, res, next) => {
   const classification_id = parseInt(req.params.classification_id);
   const invData = await invModel.getInventoryByClassificationId(
     classification_id
   );
-  if (invData[0].inv_id) {
+  
+  // CORREÇÃO: Verifica se há dados antes de tentar acessar invData[0]
+  if (invData && invData.length > 0) {
     return res.json(invData);
   } else {
-    next(new Error("No data returned"));
+    // Retorna um status 404 ou 204 se nenhum dado for encontrado para a classificação
+    return res.status(204).json([]);
   }
 };
 
 /* ***************************
- *  Build edit inventory view
+ * Build edit inventory view
  * ************************** */
 invCont.editInventoryView = async function (req, res, next) {
   const inv_id = parseInt(req.params.inv_id);
   let nav = await utilities.getNav();
+  
+  // Obtém o primeiro item do array retornado ou trata como array vazio se falhar
   const itemData = (await invModel.getInventoryById(inv_id))[0];
+  
+  if (!itemData) {
+     // Lidar com item não encontrado
+     let nav = await utilities.getNav();
+     return res.status(404).render("errors/error", {
+      title: "404 - Not Found",
+      message: "Sorry, we don't found it.",
+      nav,
+      errors: null,
+    });
+  }
+
   const selectMenu = await utilities.buildClassificationList(
     itemData.classification_id
   );
@@ -80,6 +113,9 @@ invCont.editInventoryView = async function (req, res, next) {
   });
 };
 
+/* ***************************
+ * Process edit inventory submission
+ * ************************** */
 const editInventory = async (req, res) => {
   let nav = await utilities.getNav();
   const selectMenu = await utilities.buildClassificationList();
@@ -96,7 +132,9 @@ const editInventory = async (req, res) => {
     inv_color,
     classification_id,
   } = req.body;
-  const result = await inventoryModel.updateInventory(
+  
+  // CORREÇÃO: Alterado de 'inventoryModel' para 'invModel'
+  const result = await invModel.updateInventory(
     inv_id,
     inv_make,
     inv_model,
@@ -109,6 +147,7 @@ const editInventory = async (req, res) => {
     inv_color,
     classification_id
   );
+  
   if (result) {
     req.flash(
       "notice",
@@ -116,12 +155,15 @@ const editInventory = async (req, res) => {
     );
     res.redirect("/inv/")
   } else {
-    req.flash("notice", "Sorry, the insertion failed.");
+    // Se a atualização falhar, re-renderiza a página com os dados originais
+    // para que o usuário não perca o que digitou.
+    req.flash("notice", "Sorry, the update failed.");
     res.status(501).render("inventory/edit-inventory", {
-      title: "Edit New Inventory",
+      title: "Edit " + inv_make + " " + inv_model, // Título dinâmico
       nav,
       selectMenu,
       errors: null,
+      // Passa os dados do corpo da requisição de volta para o formulário
       inv_id,
       inv_make,
       inv_model,
@@ -136,5 +178,8 @@ const editInventory = async (req, res) => {
     });
   }
 };
+
+// Adiciona a nova função ao objeto de exportação
+invCont.editInventory = editInventory;
 
 module.exports = invCont;
